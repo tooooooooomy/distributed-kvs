@@ -30,12 +30,25 @@ post '/:key' do
   STORAGE[key] = value
 
   friend_hosts = PORTS.select { |port| port != request.port }
-  friend_hosts.all? do |port|
-    uri = URI.parse("http://#{HOST}:#{port}/replicate/#{key}")
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Post.new(uri.request_uri)
-    request.body = value
-    response = http.request(request)
-    response.kind_of? Net::HTTPSuccess
+  error_count = 0
+
+  friend_hosts.each do |port|
+    begin
+      uri = URI.parse("http://#{HOST}:#{port}/replicate/#{key}")
+      http = Net::HTTP.new(uri.host, uri.port)
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request.body = value
+      response = http.request(request)
+      error_count += 1 unless response.kind_of? Net::HTTPSuccess
+    rescue => e
+      error_count += 1
+    end
+  end
+
+  case error_count
+  when 2
+    false
+  else
+    true
   end
 end
