@@ -9,7 +9,12 @@ HOST = 'localhost'
 PORTS = [3000, 3001, 3002]
 
 get '/:key' do
-  STORAGE[params['key']]
+  value = STORAGE[params['key']]
+  if value
+    value
+  else
+    status 404
+  end
 end
 
 # Internal API
