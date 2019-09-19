@@ -12,6 +12,13 @@ get '/:key' do
   STORAGE[params['key']]
 end
 
+# Internal API
+post '/replicate/:key' do
+  (key, value) = [params['key'], request.body.read]
+
+  STORAGE[key] = value
+end
+
 post '/:key' do
   (key, value) = [params['key'], request.body.read]
 
@@ -19,7 +26,7 @@ post '/:key' do
 
   friend_hosts = PORTS.select { |port| port != request.port }
   friend_hosts.all? do |port|
-    uri = URI.parse("http://#{HOST}:#{port}/#{key}")
+    uri = URI.parse("http://#{HOST}:#{port}/replicate/#{key}")
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Post.new(uri.request_uri)
     request.body = value
