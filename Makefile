@@ -1,3 +1,5 @@
+.PHONY: status start stop start-1 stop-1 restart
+
 status:
 	pgrep -f my-app.rb
 	ss -tapn | grep -e '3000\|3001\|3002'
@@ -16,4 +18,4 @@ start-1:
 stop-1:
 	pkill -9 -f 'my-app.rb -p 3000'
 
-restart: up down
+restart: stop start
